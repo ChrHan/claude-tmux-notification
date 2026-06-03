@@ -4,6 +4,16 @@ Shows a per-window `✳N` in the tmux status bar: N = number of live Claude Code
 in that window. **Orange** while any agent is busy, **green** when all are idle/finished,
 nothing when the window has no agents.
 
+## Demo
+
+![Claude tmux indicator demo](assets/demo.gif)
+
+A scripted agent lifecycle across four windows: an agent launches (green `✳1`), starts
+working (orange), a second agent joins, the first goes idle then exits, the indicator
+clears. Below, `edit` is idle (green) while `test` is busy (orange) at the same time:
+
+![idle and busy windows side by side](assets/screenshot.png)
+
 ## How it works
 
 Two writers, one reader:
@@ -92,3 +102,19 @@ hooks intact), and deletes the marker-guarded block from the tmux config. Honors
 > Note: `uninstall.sh` only removes the **marker-guarded** tmux block written by
 > `install.sh`. A pre-existing manual poller line (no markers) is left untouched — remove it
 > by hand.
+
+## Regenerating the demo
+
+The GIF is reproducible. It runs the real `claude-tmux-count.sh` + `claude-tmux-hook.sh`
+against scripted stand-in agents (a symlink named `claude` → `/bin/sleep`, which `ps`
+reports as `claude`, so the poller counts it like the real thing), on a **dedicated tmux
+socket** that never touches your live session.
+
+```bash
+brew install vhs        # one-time (also installs ffmpeg + ttyd)
+vhs demo.tape           # writes assets/demo.gif and assets/demo.mp4
+```
+
+Preview the choreography live (no recording) with `bash demo/launch.sh`. The pieces live in
+`demo/`: `launch.sh` (dedicated-socket launcher), `demo.tmux.conf` (theme-agnostic config
+that folds the `✳` into `window-status-format`), and `demo.sh` (the lifecycle script).
